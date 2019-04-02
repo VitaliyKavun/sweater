@@ -25,14 +25,24 @@ public class MainController {
         return "greeting";
     }
 
-    @GetMapping("main")
-    public String main(Map<String, Object> model){
-        Iterable<Message> messages = messageRepository.findAll();
-        model.put("messages", messages);
+    @GetMapping("/main")
+    public String main(@RequestParam (required = false, defaultValue = "" ) String filter, Model model){
+
+        Iterable<Message> messages;
+
+        if(filter != null && !filter.isEmpty()){
+            messages = messageRepository.findByTag(filter);
+        }else{
+            messages = messageRepository.findAll();
+        }
+
+        model.addAttribute("messages", messages);
+        model.addAttribute("filter", filter);
+
         return "main";
     }
 
-    @PostMapping("main")
+    @PostMapping("/main")
     public String addMessage(
             @AuthenticationPrincipal User user,
             @RequestParam String text,
@@ -44,24 +54,11 @@ public class MainController {
 
         Iterable<Message> messages = messageRepository.findAll();
         model.put("messages", messages);
-       // model.put("author", message.getAuthor());
-
-        return "main";
-    }
-
-    @PostMapping("filter")
-    public String findMessage(@RequestParam String filter, Map<String, Object> model){
-        Iterable<Message> messageList;
-        if(filter != null && !filter.isEmpty()){
-            messageList = messageRepository.findByTag(filter);
-        }else{
-            messageList = messageRepository.findAll();
-        }
-
-        model.put("messages", messageList);
 
 
         return "main";
     }
+
+
 
 }
